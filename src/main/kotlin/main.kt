@@ -7,31 +7,28 @@ internal class Main {
     private val pageToParse = "http://www.charleswysockipuzzles.com/Wysocki/Master-Checklist.aspx"
 
     fun run() {
-        getHtmlResponse {
-            findElements(it) {
-                parseElements(it) {
-                    // TODO: print these out to JSON instead
-                    print(it.toString())
-                }
-            }
-        }
+        val responseString = getHtmlResponse()
+        var elements = findElements(html = responseString)
+        val puzzles = parseElements(elements = elements)
+
+        // TODO: print these out to JSON instead
+        print(puzzles.toString())
     }
 
-    private fun getHtmlResponse(then: (String) -> Unit) {
+    private fun getHtmlResponse(): String {
         val (_, _, result) = pageToParse.httpGet().responseString()
-        then(result.get())
+        return result.get()
     }
 
-    private fun findElements(html: String, then: (Elements) -> Unit) {
-        val elements = Jsoup.parse(html)
+    private fun findElements(html: String): Elements {
+        return Jsoup.parse(html)
                 .select("#MainContent_lblPuzzles")
                 .select("div.4u")
-        then(elements)
     }
 
-    private fun parseElements(elements: Elements, then: (Array<Puzzle>) -> Unit) {
+    private fun parseElements(elements: Elements): Array<Puzzle> {
         val results = elements.mapNotNull { it.toPuzzle() }
-        then(results.toTypedArray())
+        return results.toTypedArray()
     }
 
     companion object {
